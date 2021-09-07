@@ -1,6 +1,7 @@
 package com.example.authentication;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -11,8 +12,15 @@ import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     FirebaseAuth firebaseAuth;
@@ -27,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView();
+        tvName = findViewById(R.id.tvName);
+
 
     }
     @Override
@@ -38,9 +47,12 @@ public class MainActivity extends AppCompatActivity {
 
         if(firebaseUser == null) {
             //login page
-            Intent intent = new Intent(this, RegisterActivity.class);
+            Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+        else
+            getName();
+        System.out.print(firebaseAuth.getUid() + " " + firebaseUser.getUid());
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -60,11 +72,21 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void textView() {
-        tvName = findViewById(R.id.tvName);
-       UserInfoC user = new UserInfoC();
+    public void getName() {
+        dbUser = FirebaseDatabase.getInstance().getReference("User").child(firebaseUser.getUid());
+        dbUser.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tvName.setText("Hi " + snapshot.child("name").getValue().toString());
+            }
 
-        tvName.setText("Hi " + user.getName());
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
 
     }
 }

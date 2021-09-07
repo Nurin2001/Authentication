@@ -17,16 +17,20 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    String sID;
     EditText etName, etEmail, etPass;
     Button regBtn;
     TextView tvAlrReg;
     FirebaseAuth firebaseAuth;
     ProgressBar progressBar;
+
+    FirebaseUser fbUser;
 
     private DatabaseReference dbUser;
 
@@ -82,6 +86,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if(task.isSuccessful()) {
 
                             Toast.makeText(RegisterActivity.this, "User Created!", Toast.LENGTH_SHORT).show();
+                            sID = firebaseAuth.getUid();
                             saveRealTimeDB(email);
                             startActivity(new Intent(getApplicationContext(),MainActivity.class));
                         }
@@ -94,13 +99,15 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void saveRealTimeDB(String email) {
+        fbUser = firebaseAuth.getCurrentUser();
+
         String name = etName.getText().toString().trim();
 
         if(!TextUtils.isEmpty(name) && !TextUtils.isEmpty(email)) {
-            String id = dbUser.push().getKey();
+            //String id = dbUser.push().getKey();
             UserInfoC user = new UserInfoC(name, email);
 
-            dbUser.child(id).setValue(user);
+            dbUser.child(fbUser.getUid()).setValue(user);
         }
     }
 
